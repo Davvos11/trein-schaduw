@@ -14,3 +14,4 @@ Aan welke kant van de trein moet ik zitten om in de zon/schaduw te zitten?
     ```
 
 ## Resultaat:
+![Figure_1](https://github.com/user-attachments/assets/763c5053-ff34-4e95-9f36-f531ba7e5e14)
