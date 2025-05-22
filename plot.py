@@ -21,10 +21,11 @@ class Plot:
         timestamps = [item.time for result in results for item in result[2]]
         lefts = [item.left for result in results for item in result[2]]
         rights = [item.right for result in results for item in result[2]]
+        altitudes = [item.altitude for result in results for item in result[2]]
         self.lines = pd.DataFrame({
-            "Time": timestamps * 2,
-            "Sun": lefts + rights,
-            "Side": ["Left"] * len(timestamps) + ["Right"] * len(timestamps),
+            "Time": timestamps * 3,
+            "Sun": lefts + rights + altitudes,
+            "Side": ["Left"] * len(timestamps) + ["Right"] * len(timestamps) + ["Altitude"] * len(timestamps),
         })
 
         # First time and departure name for each entry
@@ -34,8 +35,10 @@ class Plot:
         self.labels = labels
 
     def show(self):
+        plt.figure(figsize=(12, 6))
         ax = sns.lineplot(data=self.lines, x="Time", y="Sun", hue="Side")
         ax.xaxis.set_major_formatter(DateFormatter('%H:%M', tz=ZoneInfo("Europe/Amsterdam")))
+        ax.set_ylim(bottom=0)
         for timestamp, label in self.labels:
             ax.axvline(x=timestamp, color='gray', linestyle='--', linewidth=1)
             ax.text(x=timestamp, y=ax.get_ylim()[1], s=label, rotation=90,

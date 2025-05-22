@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 from datetime import timedelta
-from pprint import pprint
 
 from sun_position_calculator import SunPositionCalculator
 
@@ -30,9 +29,19 @@ def main(train_nr: int):
         #       f" {total_distance / 1000:.2f} km, {segment.duration}, {speed:.2f} m/s, {speed * 3.6:.2f} km/h")
 
         current_time = segment.stop1.departure
+        # Array for moving average
+        train_bearings = []
 
         for p1, p2, distance in zip(route, route[1:], distances):
-            train_bearing = get_bearing(p1, p2)
+            new_train_bearing = get_bearing(p1, p2)
+            # Calculate moving average
+            if len(train_bearings) == 0:
+                train_bearings = [new_train_bearing] * 50
+            else:
+                train_bearings.pop(0)
+                train_bearings.append(new_train_bearing)
+            train_bearing = sum(train_bearings) / len(train_bearings)
+
             train_vector = Vec.from_bearing(train_bearing)
             train_vector_left = train_vector.rotate_left()
             train_vector_right = train_vector.rotate_right()
