@@ -5,11 +5,14 @@ from typing import Optional
 from sun_position_calculator import SunPositionCalculator
 
 from geometry import Vec
-from logic import collect_segments, collect_distances, SegmentResult, Result, collect_bearings
+from logic import collect_segments, collect_distances, SegmentResult, Result, collect_bearings, filter_stops
 from ns import NS
 from plot import Plot
 
-def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
+
+def main(journey_id: Optional[int], train_nr: Optional[int],
+         from_station: Optional[str] = None, to_station: Optional[str] = None,
+         show_list: bool = False) -> None:
     assert train_nr is not None or journey_id is not None, "Provide either journey_id or train_nr"
     assert not (train_nr is not None and journey_id is not None), "Provide either journey_id or train_nr"
 
@@ -19,6 +22,13 @@ def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
         journey_id = ns.get_journey_id(train_nr)
         print(f"Got journey {journey_id} from train {train_nr}")
     stops = ns.get_stops(journey_id)
+
+    stops = filter_stops(stops, from_station, to_station)
+
+    if show_list:
+        for stop in stops:
+            print(f"{stop.code}: {stop.name} ({stop.time_string()})")
+        return
 
     result = []
 
@@ -76,9 +86,12 @@ def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
 if __name__ == '__main__':
     arg_parser = ArgumentParser(description="Welke kant van de trein heeft meer schaduw?")
     group = arg_parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--treinstel", type=int)
-    group.add_argument("--rit", type=int)
+    group.add_argument("--treinstel", type=int, help="Treinstel number, gets current journey of this train")
+    group.add_argument("--rit", type=int, help="Train / journey number")
+    arg_parser.add_argument("--list", action='store_true', help="List stops of tis journey, use this to get the station codes for --from and --to")
+    arg_parser.add_argument("--from", dest="from_", type=str, required=False, help="Departure station code, use --list to get the correct code")
+    arg_parser.add_argument("--to", type=str, required=False, help="Arrival station code, use --list to get the correct code")
 
     args = arg_parser.parse_args()
 
-    main(args.rit, args.treinstel)
+    main(args.rit, args.treinstel, args.from_, args.to, args.list)

@@ -16,6 +16,23 @@ class Stop:
     departure: Optional[datetime]
     arrival: Optional[datetime]
 
+    def time_string(self) -> str:
+        dep_str = arr_str = None
+        if self.departure is not None:
+            dep_str = self.departure.strftime('%H:%M')
+        if self.arrival is not None:
+            arr_str = self.arrival.strftime('%H:%M')
+        show_both = dep_str is not None and arr_str is not None and dep_str != arr_str
+
+        if show_both:
+            return f"{arr_str} - {dep_str}"
+        elif dep_str is not None:
+            return dep_str
+        elif arr_str is not None:
+            return arr_str
+        else:
+            return ''
+
 
 class NS:
     def __init__(self):

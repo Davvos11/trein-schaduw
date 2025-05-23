@@ -1,11 +1,31 @@
 from dataclasses import dataclass, field
 from datetime import timedelta, datetime
+from typing import Optional
 
 from geometry import Point, get_distance, get_bearing
 from ns import Stop
 
 MOVING_AVERAGE = 20
 KOP_MOVING_AVERAGE = 3
+
+def filter_stops(stops: list[Stop], from_station: Optional[str], to_station: Optional[str]) -> list[Stop]:
+    from_i = 0
+    to_i = 0
+    if from_station is not None:
+        for stop in stops:
+            if stop.code != from_station:
+                from_i += 1
+            else:
+                break
+    if to_station is not None:
+        for stop in stops:
+            if stop.code != to_station:
+                to_i += 1
+            else:
+                break
+    else:
+        to_i = len(stops)
+    return stops[from_i:to_i + 1]
 
 @dataclass
 class Result:
