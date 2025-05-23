@@ -8,9 +8,10 @@ Aan welke kant van de trein moet ik zitten om in de zon/schaduw te zitten?
 - Make sure [Poetry](https://python-poetry.org/docs/) is installed.
 - Run using:
     ```shell
-    poetry run python main.py [materieel nummer]
-    # For example:
-    poetry run python main.py 4211
+    poetry update # (first time only)
+    poetry run python main.py --treinstel [materieelnummer]
+    # or 
+    poetry run python main.py --rit [ritnummer]
     ```
 
 ## Resultaat:

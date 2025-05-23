@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from datetime import timedelta
+from typing import Optional
 
 from sun_position_calculator import SunPositionCalculator
 
@@ -9,10 +10,15 @@ from ns import NS
 from plot import Plot
 
 
-def main(train_nr: int):
+def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
+    assert train_nr is not None or journey_id is not None, "Provide either journey_id or train_nr"
+    assert not (train_nr is not None and journey_id is not None), "Provide either journey_id or train_nr"
+
     ns = NS()
     calculator = SunPositionCalculator()
-    journey_id = ns.get_journey_id(train_nr)
+    if journey_id is None:
+        journey_id = ns.get_journey_id(train_nr)
+        print(f"Got journey {journey_id} from train {train_nr}")
     stops = ns.get_stops(journey_id)
 
     result = []
@@ -67,8 +73,10 @@ def main(train_nr: int):
 
 if __name__ == '__main__':
     arg_parser = ArgumentParser(description="Welke kant van de trein heeft meer schaduw?")
-    arg_parser.add_argument("train_nr", type=int)
+    group = arg_parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--treinstel", type=int)
+    group.add_argument("--rit", type=int)
 
     args = arg_parser.parse_args()
 
-    main(args.train_nr)
+    main(args.rit, args.treinstel)
