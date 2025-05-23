@@ -1,3 +1,4 @@
+import time
 from argparse import ArgumentParser
 from datetime import timedelta
 from typing import Optional
@@ -13,6 +14,7 @@ from plot import Plot
 def main(journey_id: Optional[int], train_nr: Optional[int],
          from_station: Optional[str] = None, to_station: Optional[str] = None,
          show_list: bool = False) -> None:
+    t = time.time()
     assert train_nr is not None or journey_id is not None, "Provide either journey_id or train_nr"
     assert not (train_nr is not None and journey_id is not None), "Provide either journey_id or train_nr"
 
@@ -77,6 +79,8 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
 
             current_time += timedelta(seconds=line.distance / speed)
         result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
+
+    print(f"Time: {time.time() - t:.2f}s")
 
     plot = Plot()
     plot.add_results(result)
