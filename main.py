@@ -5,9 +5,12 @@ from typing import Optional
 from sun_position_calculator import SunPositionCalculator
 
 from geometry import get_bearing, Vec
-from logic import collect_segments, collect_distances, Result
+from logic import collect_segments, collect_distances, SegmentResult, Result
 from ns import NS
 from plot import Plot
+
+MOVING_AVERAGE = 50
+KOP_MOVING_AVERAGE = 3
 
 
 def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
@@ -24,8 +27,11 @@ def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
     result = []
 
     segments = collect_segments(stops)
+    previous_bearing = None
+    made_kop = False
     for segment in segments:
         segment_result = []
+        kop = False
 
         stop_ids = [s.code for s in segment.get_stops()]
         route = ns.get_route(stop_ids)
@@ -38,15 +44,32 @@ def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
         # Array for moving average
         train_bearings = []
 
-        for p1, p2, distance in zip(route, route[1:], distances):
+        for i, (p1, p2, distance) in enumerate(zip(route, route[1:], distances)):
             new_train_bearing = get_bearing(p1, p2)
             # Calculate moving average
             if len(train_bearings) == 0:
-                train_bearings = [new_train_bearing] * 50
+                train_bearings = [new_train_bearing] * MOVING_AVERAGE
             else:
                 train_bearings.pop(0)
                 train_bearings.append(new_train_bearing)
+            # Use moving average for sun calculation
             train_bearing = sum(train_bearings) / len(train_bearings)
+
+            if i == KOP_MOVING_AVERAGE and previous_bearing is not None:
+                # Compare to final bearing of previous segment to see
+                # if the train turns here (kop maken)
+                # Use a shorter moving average here
+                train_bearing_short = sum(train_bearings[-KOP_MOVING_AVERAGE:]) / KOP_MOVING_AVERAGE
+                bearing_diff = previous_bearing - train_bearing_short
+                # print(f"{segment.stop1.name} from {math.degrees(previous_bearing):.2f} to {math.degrees(new_train_bearing):.2f}")
+                if 2.95 < bearing_diff < 3.5:
+                    # Save that we made kop at this segment for visualisation
+                    kop = True
+                    # Flip the `made_kop` variable so we can flip left and right accordingly
+                    made_kop = not made_kop
+            if i == len(route) - 2:
+                # Use a shorter moving average for "kop maken" calculation
+                previous_bearing = sum(train_bearings[-KOP_MOVING_AVERAGE:]) / KOP_MOVING_AVERAGE
 
             train_vector = Vec.from_bearing(train_bearing)
             train_vector_left = train_vector.rotate_left()
@@ -58,13 +81,15 @@ def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
 
             dot_left = sun_vector.dot(train_vector_left)
             dot_right = sun_vector.dot(train_vector_right)
+            if made_kop:
+                dot_left, dot_right = dot_right, dot_left
             # print("Sun: {bearing_to_compass(sun_position.azimuth)}, train: {bearing_to_compass(train_bearing)},"
             #       " left: {dot_left}, right: {dot_right}")
 
-            segment_result.append(Result(current_time, dot_left, dot_right, sun_position.altitude))
+            segment_result.append(SegmentResult(current_time, dot_left, dot_right, sun_position.altitude))
 
             current_time += timedelta(seconds=distance / speed)
-        result.append((segment.stop1.name, segment.stop2.name, segment_result))
+        result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
 
     plot = Plot()
     plot.add_results(result)

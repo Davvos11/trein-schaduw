@@ -7,6 +7,14 @@ from ns import Stop
 
 @dataclass
 class Result:
+    stop1: str
+    stop2: str
+    kop: bool
+    items: list['SegmentResult']
+
+
+@dataclass
+class SegmentResult:
     time: datetime
     left: float
     right: float
