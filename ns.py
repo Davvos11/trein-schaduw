@@ -34,6 +34,18 @@ class Stop:
             return ''
 
 
+@dataclass
+class Journey:
+    name: str
+    number: int
+    direction: str
+    departure: datetime
+    arrival: datetime
+    dep_track: str
+    arr_track: str
+    stops: list[str]
+
+
 class NS:
     def __init__(self):
         load_dotenv()
@@ -85,3 +97,31 @@ class NS:
         assert len(features) == 1
         coordinates = features[0]["geometry"]["coordinates"]
         return [Point.from_geojson(c) for c in coordinates]
+
+    def get_from_stations(self, from_station: str, to_station: str, timestamp: Optional[datetime] = None) \
+            -> list[Journey]:
+        url = (f"https://gateway.apiportal.ns.nl/reisinformatie-api/api/v3/trips"
+               f"?fromStation={from_station}&toStation={to_station}"
+               f"&entireTripModality=train")
+        if timestamp is not None:
+            url += f"&dateTime={timestamp.strftime('%Y-%m-%dT%H:%M:%S')}"
+        response = self._get_json(url)
+        trips = response["trips"]
+
+        result = []
+        for trip in trips:
+            if trip["transfers"] > 0:
+                continue
+            leg = trip["legs"][0]
+            journey = Journey(
+                leg["product"]["displayName"],
+                int(leg["product"]["number"]),
+                leg["direction"],
+                datetime.fromisoformat(leg["origin"]["plannedDateTime"]),
+                datetime.fromisoformat(leg["destination"]["plannedDateTime"]),
+                leg["origin"]["plannedTrack"],  # TODO actualtrack
+                leg["destination"]["plannedTrack"],
+                [s["name"] for s in leg["stops"]][1:-1],
+            )
+            result.append(journey)
+        return result

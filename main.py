@@ -91,10 +91,13 @@ if __name__ == '__main__':
     arg_parser = ArgumentParser(description="Welke kant van de trein heeft meer schaduw?")
     group = arg_parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--treinstel", type=int, help="Treinstel number, gets current journey of this train")
-    group.add_argument("--rit", type=int, help="Train / journey number")
-    arg_parser.add_argument("--list", action='store_true', help="List stops of tis journey, use this to get the station codes for --from and --to")
-    arg_parser.add_argument("--from", dest="from_", type=str, required=False, help="Departure station code, use --list to get the correct code")
-    arg_parser.add_argument("--to", type=str, required=False, help="Arrival station code, use --list to get the correct code")
+    group.add_argument("--rit", type=int, help="Train / journey number, use 'main-search.py' to get this number")
+    arg_parser.add_argument("--list", action='store_true',
+                            help="List stops of tis journey, use this to get the station codes for --from and --to")
+    arg_parser.add_argument("--from", dest="from_", type=str, required=False,
+                            help="Departure station code, use --list to get the correct code")
+    arg_parser.add_argument("--to", type=str, required=False,
+                            help="Arrival station code, use --list to get the correct code")
 
     args = arg_parser.parse_args()
 
