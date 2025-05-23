@@ -16,6 +16,8 @@ Aan welke kant van de trein moet ik zitten om in de zon/schaduw te zitten?
     poetry run python main-stations.py
     # To list trips between two stations
     poetry run python main-search.py --from [station code] --to [station code]
+    # Or, launch the web frontend
+    poetry run fastapi dev web.py
     ```
 
 ## Resultaat:

@@ -15,6 +15,16 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
          from_station: Optional[str] = None, to_station: Optional[str] = None,
          show_list: bool = False) -> None:
     t = time.time()
+    result = get_result(journey_id, train_nr, from_station, to_station, show_list)
+    print(f"Time: {time.time() - t:.2f}s")
+
+    plot = Plot()
+    plot.add_results(result)
+    plot.show()
+
+def get_result(journey_id: Optional[int], train_nr: Optional[int],
+         from_station: Optional[str] = None, to_station: Optional[str] = None,
+         show_list: bool = False) -> list[Result]:
     assert train_nr is not None or journey_id is not None, "Provide either journey_id or train_nr"
     assert not (train_nr is not None and journey_id is not None), "Provide either journey_id or train_nr"
 
@@ -30,7 +40,7 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
     if show_list:
         for stop in stops:
             print(f"{stop.code}: {stop.name} ({stop.time_string()})")
-        return
+        return []
 
     result = []
 
@@ -80,11 +90,7 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
             current_time += timedelta(seconds=line.distance / speed)
         result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
 
-    print(f"Time: {time.time() - t:.2f}s")
-
-    plot = Plot()
-    plot.add_results(result)
-    plot.show()
+    return result
 
 
 if __name__ == '__main__':

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Zon in de trein</title>
+</head>
+<body>
+    <form id="search-trips">
+        <datalist id="stations">
+            {% for station in stations %}
+                <option data-value="{{ station[0] }}" value="{{ station[1] }}"></option>
+            {% endfor %}
+        </datalist>
+        <label>
+            Van:
+            <input id="from" type="text" list="stations">
+        </label>
+        <label>
+            Naar:
+            <input id="to" type="text" list="stations">
+        </label>
+        <label>
+            Vertrek:
+            <input id="time" type="time" >
+        </label>
+        <input type="submit">
+    </form>
+
+    <ul id="trips"></ul>
+
+    <script>
+        document.getElementById("search-trips").onsubmit = async (ev) => {
+            ev.preventDefault();
+
+            const from_name = document.getElementById("from").value;
+            const to_name = document.getElementById("to").value;
+            const from_code = document.querySelector(`#stations option[value='${from_name}']`).dataset.value;
+            const to_code = document.querySelector(`#stations option[value='${to_name}']`).dataset.value;
+            const time = document.getElementById("time").value;
+
+            let url = `/search/${from_code}/${to_code}`;
+            if (time !== "") {
+                url += `?dep_time=${time}`
+            }
+            const res = await fetch(url);
+            const journeys = await res.json();
+            const result_div = document.getElementById("trips");
+            for (const journey of journeys) {
+                const departure = new Date(journey["departure"]).toLocaleTimeString("nl-NL", {hour: "2-digit", minute: "2-digit"})
+                const arrival = new Date(journey["arrival"]).toLocaleTimeString("nl-NL", {hour: "2-digit", minute: "2-digit"})
+                const url = `/result?trip=${journey['number']}&from=${from_code}&to=${to_code}`;
+                result_div.innerHTML += `<li><a href="${url}">
+                    <b>${departure} spoor ${journey['dep_track']}:</b>
+                    ${journey['name']} naar ${journey['direction']} <br>
+                     via ${journey['stops'].join(', ')} <br>
+                     aankomst op spoor ${journey['arr_track']} om ${arrival}
+                    </a></li>`;
+            }
+        }
+    </script>
+</body>
+</html>
