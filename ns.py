@@ -125,3 +125,7 @@ class NS:
             )
             result.append(journey)
         return result
+
+    def get_stations(self) -> list[tuple[str, str]]:
+        response = self._get_json("https://gateway.apiportal.ns.nl/nsapp-stations/v3?includeNonPlannableStations=false")
+        return [(station["id"]["code"], station["names"]["long"]) for station in response["payload"]]

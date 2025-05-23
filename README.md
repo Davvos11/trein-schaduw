@@ -12,6 +12,10 @@ Aan welke kant van de trein moet ik zitten om in de zon/schaduw te zitten?
     poetry run python main.py --treinstel [materieelnummer]
     # or 
     poetry run python main.py --rit [ritnummer]
+    # To list stations and their codes:
+    poetry run python main-stations.py
+    # To list trips between two stations
+    poetry run python main-search.py --from [station code] --to [station code]
     ```
 
 ## Resultaat:
