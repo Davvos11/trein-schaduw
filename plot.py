@@ -1,5 +1,4 @@
 from datetime import datetime
-from pprint import pprint
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -8,7 +7,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.dates import DateFormatter
 
-from logic import SegmentResult, Result
+from logic import Result
 
 
 class Plot:

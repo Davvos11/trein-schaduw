@@ -4,14 +4,10 @@ from typing import Optional
 
 from sun_position_calculator import SunPositionCalculator
 
-from geometry import get_bearing, Vec
-from logic import collect_segments, collect_distances, SegmentResult, Result
+from geometry import Vec
+from logic import collect_segments, collect_distances, SegmentResult, Result, collect_bearings
 from ns import NS
 from plot import Plot
-
-MOVING_AVERAGE = 50
-KOP_MOVING_AVERAGE = 3
-
 
 def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
     assert train_nr is not None or journey_id is not None, "Provide either journey_id or train_nr"
@@ -41,41 +37,22 @@ def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
         #       f" {total_distance / 1000:.2f} km, {segment.duration}, {speed:.2f} m/s, {speed * 3.6:.2f} km/h")
 
         current_time = segment.stop1.departure
-        # Array for moving average
-        train_bearings = []
 
-        for i, (p1, p2, distance) in enumerate(zip(route, route[1:], distances)):
-            new_train_bearing = get_bearing(p1, p2)
-            # Calculate moving average
-            if len(train_bearings) == 0:
-                train_bearings = [new_train_bearing] * MOVING_AVERAGE
-            else:
-                train_bearings.pop(0)
-                train_bearings.append(new_train_bearing)
-            # Use moving average for sun calculation
-            train_bearing = sum(train_bearings) / len(train_bearings)
+        line_segments, start_bearing, end_bearing = collect_bearings(route, distances)
+        if (previous_bearing is not None and
+                2.95 < previous_bearing - start_bearing < 3.5):
+            # Save that we made kop at this segment for visualisation
+            kop = True
+            # Flip the `made_kop` variable so we can flip left and right accordingly
+            made_kop = not made_kop
+        previous_bearing = end_bearing
 
-            if i == KOP_MOVING_AVERAGE and previous_bearing is not None:
-                # Compare to final bearing of previous segment to see
-                # if the train turns here (kop maken)
-                # Use a shorter moving average here
-                train_bearing_short = sum(train_bearings[-KOP_MOVING_AVERAGE:]) / KOP_MOVING_AVERAGE
-                bearing_diff = previous_bearing - train_bearing_short
-                # print(f"{segment.stop1.name} from {math.degrees(previous_bearing):.2f} to {math.degrees(new_train_bearing):.2f}")
-                if 2.95 < bearing_diff < 3.5:
-                    # Save that we made kop at this segment for visualisation
-                    kop = True
-                    # Flip the `made_kop` variable so we can flip left and right accordingly
-                    made_kop = not made_kop
-            if i == len(route) - 2:
-                # Use a shorter moving average for "kop maken" calculation
-                previous_bearing = sum(train_bearings[-KOP_MOVING_AVERAGE:]) / KOP_MOVING_AVERAGE
-
-            train_vector = Vec.from_bearing(train_bearing)
+        for line in line_segments:
+            train_vector = Vec.from_bearing(line.bearing_avg())
             train_vector_left = train_vector.rotate_left()
             train_vector_right = train_vector.rotate_right()
 
-            sun_position = calculator.pos(current_time.timestamp() * 1000, p1.lat, p1.lon)
+            sun_position = calculator.pos(current_time.timestamp() * 1000, line.position.lat, line.position.lon)
             # Note: negate / flip 180 degrees because the sun shines in the opposite direction of the azimuth
             sun_vector = -Vec.from_bearing(sun_position.azimuth)
 
@@ -88,7 +65,7 @@ def main(journey_id: Optional[int], train_nr: Optional[int]) -> None:
 
             segment_result.append(SegmentResult(current_time, dot_left, dot_right, sun_position.altitude))
 
-            current_time += timedelta(seconds=distance / speed)
+            current_time += timedelta(seconds=line.distance / speed)
         result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
 
     plot = Plot()
