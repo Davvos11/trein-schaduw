@@ -1,3 +1,5 @@
+import json
+from dataclasses import asdict
 from datetime import time, datetime
 from typing import Optional
 
@@ -24,10 +26,18 @@ async def index(request: Request):
 
 @app.get("/result")
 async def result_page(request: Request, trip: int,
-                from_: Optional[str] = Query(None, alias='from'),
-                to: Optional[str] = None):
+                      from_: Optional[str] = Query(None, alias='from'),
+                      to: Optional[str] = None):
     result = get_result(trip, None, from_, to)
-    return templates.TemplateResponse(request=request, name="result.html", context={"result": result})
+    return templates.TemplateResponse(
+        request=request, name="result.html",
+        context={
+            "result": json.dumps([asdict(r) for r in result], default=str),
+            "trip": trip,
+            "from": from_,
+            "to": to,
+        }
+    )
 
 
 @app.get("/search/{from_}/{to}")
