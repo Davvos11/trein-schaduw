@@ -119,8 +119,8 @@ class NS:
                 leg["direction"],
                 datetime.fromisoformat(leg["origin"]["plannedDateTime"]),
                 datetime.fromisoformat(leg["destination"]["plannedDateTime"]),
-                leg["origin"]["plannedTrack"],  # TODO actualtrack
-                leg["destination"]["plannedTrack"],
+                leg["origin"].get("plannedTrack") or leg["origin"].get("actualTrack"),
+                leg["destination"].get("plannedTrack") or leg["destination"].get("actualTrack"),
                 [s["name"] for s in leg["stops"]][1:-1],
             )
             result.append(journey)
