@@ -62,7 +62,7 @@ def get_result(journey_id: Optional[int], train_nr: Optional[int],
 
         line_segments, start_bearing, end_bearing = collect_bearings(route, distances)
         if (previous_bearing is not None and
-                2.95 < previous_bearing - start_bearing < 3.5):
+                2.95 < abs(previous_bearing - start_bearing) < 3.5):
             # Save that we made kop at this segment for visualisation
             kop = True
             # Flip the `made_kop` variable so we can flip left and right accordingly
