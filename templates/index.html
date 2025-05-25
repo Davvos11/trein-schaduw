@@ -35,8 +35,8 @@
 
             const from_name = document.getElementById("from").value;
             const to_name = document.getElementById("to").value;
-            const from_code = document.querySelector(`#stations option[value='${from_name}']`).dataset.value;
-            const to_code = document.querySelector(`#stations option[value='${to_name}']`).dataset.value;
+            const from_code = document.querySelector(`#stations option[value="${from_name}"]`).dataset.value;
+            const to_code = document.querySelector(`#stations option[value="${to_name}"]`).dataset.value;
             const time = document.getElementById("time").value;
 
             let url = `/search/${from_code}/${to_code}`;
@@ -46,6 +46,7 @@
             const res = await fetch(url);
             const journeys = await res.json();
             const result_div = document.getElementById("trips");
+            result_div.innerHTML = "";
             for (const journey of journeys) {
                 const departure = new Date(journey["departure"]).toLocaleTimeString("nl-NL", {hour: "2-digit", minute: "2-digit"})
                 const arrival = new Date(journey["arrival"]).toLocaleTimeString("nl-NL", {hour: "2-digit", minute: "2-digit"})
