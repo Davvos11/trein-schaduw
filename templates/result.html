@@ -4,12 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>{{ trip }}: {{ from }} - {{ to }} - Zon in de trein</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="/static/common.css">
+    <link rel="stylesheet" href="/static/result.css">
 </head>
 <body>
 <textarea id="data" style="display: none" aria-hidden="true" aria-label="hidden">
         {{ result }}
     </textarea>
-<canvas id="chart"></canvas>
+<main class="container">
+    <div class="info">
+        <h2><span class="name">{{ journey.name }}</span>
+            naar <span class="direction">{{ journey.direction }}</span>
+            <span class="number text-secondary">({{ journey.number }})</span></h2>
+    </div>
+    <nav class="nav nav-tabs" role="tablist">
+        <a class="nav-link active" id="nav-vertical" data-bs-toggle="tab" href="#tab-vertical"
+           role="tab" aria-controls="tab-vertical" aria-selected="false">
+            Simpel
+        </a>
+        <a class="nav-link" id="nav-horizontal" data-bs-toggle="tab" href="#tab-horizontal"
+           role="tab" aria-controls="tab-horizontal" aria-selected="true">
+            Geavanceerd
+        </a>
+    </nav>
+    <div class="tab-content" id="chart-tabs">
+        <div class="tab-pane show active" id="tab-vertical" aria-labelledby="nav-vertical">
+            <canvas id="chart-vertical"></canvas>
+        </div>
+        <div class="tab-pane" id="tab-horizontal" aria-labelledby="nav-horizontal">
+            <canvas id="chart-horizontal"></canvas>
+        </div>
+    </div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -66,8 +96,8 @@
     annotation_labels[annotation_labels.length - 1].position = '60%';
     const annotations = Object.assign({}, annotation_lines.concat(annotation_labels));
 
-    const ctx = document.getElementById("chart");
-    new Chart(ctx, {
+    const ctx_h = document.getElementById("chart-horizontal");
+    new Chart(ctx_h, {
         type: 'line',
         data: {
             datasets: [
@@ -92,6 +122,9 @@
             ]
         },
         options: {
+            animation: {
+                duration: 0,
+            },
             responsive: true,
             scales: {
                 x: {
@@ -111,16 +144,95 @@
                     position: 'top',
                 },
                 annotation: {
-                    // annotations: {
-                    //     line1: {
-                    //         type: 'line',
-                    //         xMin: new Date("2025-05-24 15:07:36.317530+02:00"),
-                    //         xMax: new Date("2025-05-24 15:07:36.317530+02:00"),
-                    //         borderColor: 'rgb(255, 99, 132)',
-                    //         borderWidth: 2,
-                    //     }
-                    // }
                     annotations: annotations,
+                }
+            }
+        },
+    });
+
+    const left_data_v = left_data
+        .filter(([_, value]) => value >= 0)
+        .map(([time, value]) => [-value, time.getTime()]);
+    const right_data_v = right_data
+        .filter(([_, value]) => value >= 0)
+        .map(([time, value]) => [value, time]);
+
+    const annotation_lines_v = labels.map((label) => {
+        return {
+            type: 'line',
+            yMin: label.time,
+            yMax: label.time,
+            borderColor: 'grey',
+            borderWidth: 2,
+            borderDash: [5, 15],
+        }
+    });
+    const annotation_labels_v = labels.map((label) => {
+        return {
+            type: 'label',
+            yValue: label.time,
+            xValue: 0,
+            backgroundColor: label.kop ? 'rgba(245, 120, 120)' : 'rgba(245,245,245)',
+            content: [label.name],
+            font: {
+                size: 10
+            },
+            position: {x: 'center', y: 'center'},
+        }
+    });
+    annotation_labels_v[0].position.y = '0%';
+    annotation_labels_v[annotation_labels_v.length - 1].position.y = '100%';
+    const annotations_v = Object.assign({}, annotation_lines_v.concat(annotation_labels_v));
+
+    const ctx_v = document.getElementById("chart-vertical");
+    new Chart(ctx_v, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Links',
+                    data: left_data_v,
+                    borderColor: 'red',
+                    pointStyle: false,
+                },
+                {
+                    label: 'Rechts',
+                    data: right_data_v,
+                    borderColor: 'blue',
+                    pointStyle: false,
+                },
+            ]
+        },
+        options: {
+            animation: {
+                duration: 0,
+            },
+            indexAxis: 'y',
+            responsive: true,
+            scales: {
+                y: {
+                    type: 'time',
+                    time: {
+                        // parser: 'HH:mm',
+                        unit: 'minute',
+                        displayFormats: {minute: 'HH:mm'}
+                    },
+                    reverse: true,
+                },
+                x: {
+                    min: -1,
+                    max: 1,
+                    ticks: {
+                        callback: (value) => Math.abs(value),
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                annotation: {
+                    annotations: annotations_v,
                 }
             }
         },

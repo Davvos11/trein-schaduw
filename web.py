@@ -30,11 +30,12 @@ async def index(request: Request):
 async def result_page(request: Request, trip: int,
                       from_: Optional[str] = Query(None, alias='from'),
                       to: Optional[str] = None):
-    result = get_result(trip, None, from_, to)
+    journey, result = get_result(trip, None, from_, to)
     return templates.TemplateResponse(
         request=request, name="result.html",
         context={
             "result": json.dumps([asdict(r) for r in result], default=str),
+            "journey": journey,
             "trip": trip,
             "from": from_,
             "to": to,

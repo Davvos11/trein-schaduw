@@ -46,6 +46,13 @@ class Journey:
     stops: list[str]
 
 
+@dataclass
+class JourneyShort:
+    name: str
+    number: int
+    direction: str
+
+
 class NS:
     def __init__(self):
         load_dotenv()
@@ -64,11 +71,11 @@ class NS:
         journey_id = self._get_text(f"https://gateway.apiportal.ns.nl/virtual-train-api/v1/ritnummer/{train_nr}")
         return int(journey_id)
 
-    def get_stops(self, journey_id: int) -> list[Stop]:
+    def get_journey(self, journey_id: int) -> tuple[JourneyShort, list[Stop]]:
         response = self._get_json(
             f"https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/journey?train={journey_id}&omitCrowdForecast=true")
         stops = response["payload"]["stops"]
-        result = []
+        stops_result = []
         for stop in stops:
             station_code = stop["id"].split("_")[0]
             name = stop["stop"]["name"]
@@ -84,8 +91,16 @@ class NS:
                 assert len(arrivals) == 1
                 arrival = arrivals[0]["plannedTime"]
                 arrival = datetime.fromisoformat(arrival)
-            result.append(Stop(station_code, name, departure, arrival))
-        return result
+            stops_result.append(Stop(station_code, name, departure, arrival))
+
+        product = stops[0]["departures"][0]["product"]
+        info = JourneyShort(
+            f"{product['operatorName']} {product['longCategoryName']}",
+            journey_id,
+            stops[0]["destination"],
+        )
+
+        return info, stops_result
 
     def get_route(self, station_codes: list[str]) -> list[Point]:
         station_str = ",".join(station_codes)

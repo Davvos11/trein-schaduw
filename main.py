@@ -7,7 +7,7 @@ from sun_position_calculator import SunPositionCalculator
 
 from geometry import Vec
 from logic import collect_segments, collect_distances, SegmentResult, Result, collect_bearings, filter_stops
-from ns import NS
+from ns import NS, JourneyShort
 from plot import Plot
 
 
@@ -15,7 +15,7 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
          from_station: Optional[str] = None, to_station: Optional[str] = None,
          show_list: bool = False) -> None:
     t = time.time()
-    result = get_result(journey_id, train_nr, from_station, to_station, show_list)
+    journey, result = get_result(journey_id, train_nr, from_station, to_station, show_list)
     print(f"Time: {time.time() - t:.2f}s")
 
     plot = Plot()
@@ -25,7 +25,7 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
 
 def get_result(journey_id: Optional[int], train_nr: Optional[int],
                from_station: Optional[str] = None, to_station: Optional[str] = None,
-               show_list: bool = False) -> list[Result]:
+               show_list: bool = False) -> tuple[JourneyShort, list[Result]]:
     assert train_nr is not None or journey_id is not None, "Provide either journey_id or train_nr"
     assert not (train_nr is not None and journey_id is not None), "Provide either journey_id or train_nr"
 
@@ -34,7 +34,7 @@ def get_result(journey_id: Optional[int], train_nr: Optional[int],
     if journey_id is None:
         journey_id = ns.get_journey_id(train_nr)
         print(f"Got journey {journey_id} from train {train_nr}")
-    stops = ns.get_stops(journey_id)
+    journey, stops = ns.get_journey(journey_id)
 
     stops = filter_stops(stops, from_station, to_station)
 
@@ -91,7 +91,7 @@ def get_result(journey_id: Optional[int], train_nr: Optional[int],
             current_time += timedelta(seconds=line.distance / speed)
         result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
 
-    return result
+    return journey, result
 
 
 if __name__ == '__main__':
