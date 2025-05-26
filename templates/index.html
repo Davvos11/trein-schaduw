@@ -31,7 +31,9 @@
         <div class="input-group">
             <label for="time" class="input-group-text">Tijd:</label>
             <input id="time" class="form-control" type="time">
-            <button type="button" class="btn btn-outline-primary" onclick="(() => document.getElementById('time').value = '')()">Nu</button>
+            <button type="button" class="btn btn-outline-primary"
+                    onclick="(() => document.getElementById('time').value = '')()">Nu
+            </button>
         </div>
         <input type="submit" class="form-control btn btn-primary" value="Zoeken">
     </form>
@@ -78,13 +80,25 @@
                 minute: "2-digit"
             })
             const url = `/result?trip=${journey['number']}&from=${from_code}&to=${to_code}`;
-            result_div.innerHTML += `<li><a href="${url}">
-                    <b>${departure} spoor ${journey['dep_track']}:</b>
-                    ${journey['name']} naar ${journey['direction']} <br>
-                     via ${journey['stops'].join(', ')} <br>
-                     aankomst op spoor ${journey['arr_track']} om ${arrival}
-                    </a></li>`;
+            result_div.innerHTML += `<div><a href="${url}" class="row">
+                <div class="col-2 trip-time">${departure}</div>
+                <div class="col-7">
+                    <div class="row">
+                        <div class="col-12 trip-direction">${journey['direction']}</div>
+                        <div class="col-12 trip-via text-secondary">
+                            ${journey['stops'].length > 0 ? `via ${journey['stops'].join(', ')}` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-1 trip-track">${journey['dep_track']}</div>
+                <div class="col-2 trip-type">${journey['name']}</div>
+            </a></div>`;
         }
+    }
+
+    // Already search if there is still values in the search fields (most browsers remember this)
+    if (document.getElementById("from").value !== "" && document.getElementById("to").value !== "") {
+        document.querySelector("#search-trips input[type=submit]").click();
     }
 </script>
 </body>

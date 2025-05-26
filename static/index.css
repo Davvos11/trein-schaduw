@@ -5,6 +5,7 @@
 #search-trips {
     display: flex;
     flex-direction: column;
+    padding-top: 20px;
     padding-bottom: 20px;
 }
 
@@ -14,4 +15,33 @@
 
 #search-trips .input-group-text {
     min-width: 4.5em;
+}
+
+#trips {
+    padding: unset;
+}
+
+#trips * {
+    text-decoration: none;
+}
+
+.trip-direction, .trip-time {
+    font-size: 1.5em;
+}
+
+.trip-via {
+    font-size: 0.8em;
+}
+
+.trip-track {
+    background-image: url("/static/spoor.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    text-align: center;
+    font-size: 1.2em;
+    line-height: 2.6em;
+}
+
+.trip-type {
+    text-align: center;
 }
