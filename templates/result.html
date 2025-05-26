@@ -13,14 +13,16 @@
 </head>
 <body>
 <textarea id="data" style="display: none" aria-hidden="true" aria-label="hidden">
-        {{ result }}
-    </textarea>
+    {{ result }}
+</textarea>
 <main class="container">
     <div class="info">
         <h2><span class="name">{{ journey.name }}</span>
             naar <span class="direction">{{ journey.direction }}</span>
             <span class="number text-secondary">({{ journey.number }})</span></h2>
+        <a role="button" href="/" class="btn btn-primary">Terug</a>
     </div>
+    <span id="duration" style="display: none;">{{ journey.duration }}</span>
     <nav class="nav nav-tabs" role="tablist">
         <a class="nav-link active" id="nav-vertical" data-bs-toggle="tab" href="#tab-vertical"
            role="tab" aria-controls="tab-vertical" aria-selected="false">
@@ -84,10 +86,10 @@
             type: 'label',
             xValue: label.time,
             yValue: 0.8,
-            backgroundColor: label.kop ? 'rgba(245, 120, 120)' : 'rgba(245,245,245)',
+            backgroundColor: label.kop ? 'rgba(255,225,220,0.8)' : 'rgba(245,245,245, 0.8)',
             content: [label.name],
             font: {
-                size: 10
+                size: 13
             },
             rotation: -90,
             position: '40%',
@@ -122,6 +124,7 @@
             ]
         },
         options: {
+            stepped: 'middle',
             animation: {
                 duration: 0,
             },
@@ -150,41 +153,37 @@
         },
     });
 
-    const left_data_v = left_data
-        .filter(([_, value]) => value >= 0)
-        .map(([time, value]) => [-value, time.getTime()]);
-    const right_data_v = right_data
-        .filter(([_, value]) => value >= 0)
-        .map(([time, value]) => [value, time]);
 
-    const annotation_lines_v = labels.map((label) => {
-        return {
-            type: 'line',
-            yMin: label.time,
-            yMax: label.time,
-            borderColor: 'grey',
-            borderWidth: 2,
-            borderDash: [5, 15],
-        }
+    // TODO, niet >=
+    const left_data_v = left_data
+        .map(([time, value]) => value > 0 ? [-value, time] : [null, time]);
+    const right_data_v = right_data
+        .map(([time, value]) => value > 0 ? [value, time] : [null, time]);
+
+    const annotation_lines_v = annotation_lines.map((old_item) => {
+        const item = structuredClone(old_item);
+        // noinspection JSSuspiciousNameCombination
+        item.yMin = item.yMax = item.xMin;
+        delete item.xMin;
+        delete item.xMax;
+        return item;
     });
-    const annotation_labels_v = labels.map((label) => {
-        return {
-            type: 'label',
-            yValue: label.time,
-            xValue: 0,
-            backgroundColor: label.kop ? 'rgba(245, 120, 120)' : 'rgba(245,245,245)',
-            content: [label.name],
-            font: {
-                size: 10
-            },
-            position: {x: 'center', y: 'center'},
-        }
+    const annotation_labels_v = annotation_labels.map((old_item) => {
+        const item = structuredClone(old_item);
+        // noinspection JSSuspiciousNameCombination
+        item.yValue = item.xValue;
+        item.xValue = 0;
+        item.position = {x: 'center', y: 'center'};
+        delete item.rotation;
+        return item;
     });
     annotation_labels_v[0].position.y = '0%';
     annotation_labels_v[annotation_labels_v.length - 1].position.y = '100%';
     const annotations_v = Object.assign({}, annotation_lines_v.concat(annotation_labels_v));
 
     const ctx_v = document.getElementById("chart-vertical");
+    const duration = Number(document.getElementById("duration").innerText); // (duration in seconds)
+    ctx_v.height = Math.max(460, duration / 30);
     new Chart(ctx_v, {
         type: 'line',
         data: {
@@ -204,6 +203,8 @@
             ]
         },
         options: {
+            maintainAspectRation: false,
+            stepped: 'middle',
             animation: {
                 duration: 0,
             },
@@ -218,6 +219,9 @@
                         displayFormats: {minute: 'HH:mm'}
                     },
                     reverse: true,
+                    ticks: {
+                        stepSize: 15,
+                    },
                 },
                 x: {
                     min: -1,

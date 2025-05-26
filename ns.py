@@ -51,6 +51,7 @@ class JourneyShort:
     name: str
     number: int
     direction: str
+    duration: float
 
 
 class NS:
@@ -98,6 +99,7 @@ class NS:
             f"{product['operatorName']} {product['longCategoryName']}",
             journey_id,
             stops[0]["destination"],
+            (stops_result[-1].arrival - stops_result[0].departure).total_seconds(),
         )
 
         return info, stops_result
