@@ -1,0 +1,17 @@
+.container {
+    max-width: 500px;
+}
+
+#search-trips {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 20px;
+}
+
+#search-trips > * {
+    padding-bottom: 10px;
+}
+
+#search-trips .input-group-text {
+    min-width: 4.5em;
+}
