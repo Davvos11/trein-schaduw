@@ -21,7 +21,9 @@ ns = NS()
 @app.get("/")
 async def index(request: Request):
     stations = ns.get_stations()
-    return templates.TemplateResponse(request=request, name="index.html", context={"stations": stations})
+    return templates.TemplateResponse(
+        request=request, name="index.html", context={"stations": stations}
+    )
 
 
 @app.get("/result")
