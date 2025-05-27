@@ -28,6 +28,8 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
 @dataclass
 class FinalResult(JourneyResult):
     result: list[Result]
+    left: float
+    right: float
 
 def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
                from_station: Optional[str] = None, to_station: Optional[str] = None,
@@ -49,6 +51,8 @@ def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
         return FinalResult(**asdict(journey), result=[])
 
     result = []
+    duration_left = 0
+    duration_right = 0
 
     segments = collect_segments(stops)
     previous_bearing = None
@@ -96,12 +100,18 @@ def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
                 dot_left *= multiplier
                 dot_right *= multiplier
 
-            segment_result.append(SegmentResult(current_time, dot_left, dot_right, sun_position.altitude))
+            duration = line.distance / speed
 
-            current_time += timedelta(seconds=line.distance / speed)
+            segment_result.append(SegmentResult(current_time, dot_left, dot_right, sun_position.altitude))
+            if dot_left > 0:
+                duration_left += duration
+            if dot_right > 0:
+                duration_right += duration
+
+            current_time += timedelta(seconds=duration)
         result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
 
-    return FinalResult(**asdict(journey), result=result)
+    return FinalResult(**asdict(journey), result=result, left=duration_left, right=duration_right)
 
 
 if __name__ == '__main__':

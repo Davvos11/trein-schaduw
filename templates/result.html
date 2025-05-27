@@ -24,6 +24,24 @@
             <span class="number text-secondary">({{ journey.number }})</span></h2>
         <a role="button" href="/" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Terug</a>
     </div>
+    <div id="results-container" class="row gx-5 gy-3">
+        <div class="col-12 col-md-6">
+            <div class="card {{ 'text-white bg-primary' if left_time >= right_time else 'text-primary border-primary' }}">
+                <div class="card-body">
+                    <h4 class="card-title">Links: {{ left_percentage }}%</h4>
+                    <p class="card-text">{{ left_time }} minuten zon</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card {{ 'text-white bg-danger' if left_time < right_time else 'text-danger border-danger' }}">
+                <div class="card-body">
+                    <h4 class="card-title">Rechts: {{ right_percentage }}%</h4>
+                    <p class="card-text">{{ right_time }} minuten zon</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <span id="duration" style="display: none;">{{ journey.duration }}</span>
     <nav class="nav nav-tabs" role="tablist">
         <a class="nav-link active" id="nav-vertical" data-bs-toggle="tab" href="#tab-vertical"

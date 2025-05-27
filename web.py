@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from datetime import time, datetime
+from datetime import time, datetime, timedelta
 from typing import Optional
 
 from fastapi import FastAPI, Request, Query
@@ -38,6 +38,10 @@ async def result_page(request: Request, trip: int,
             "trip": trip,
             "from": from_,
             "to": to,
+            "left_time": round(journey.left / 60),
+            "right_time": round(journey.right / 60),
+            "left_percentage": round(journey.left / journey.duration * 100),
+            "right_percentage": round(journey.right / journey.duration * 100),
         }
     )
 
