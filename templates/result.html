@@ -52,7 +52,6 @@
     const unit = document.getElementById("data").value;
     /** @type Array<object> */
     const raw_data = JSON.parse(unit);
-    console.log(raw_data);
 
     const flat_data = raw_data.map((segment) => segment['items']).flat();
     const left_data = flat_data.map((line) => [new Date(line['time']), line['left']]);
@@ -186,7 +185,6 @@
                 char_index += word.length;
                 const seperator = name[char_index];
                 first_line += word + seperator;
-                console.log(word, seperator, first_line);
                 if (ctx.measureText(first_line).width > canvas.width - 30) {
                     // If we hit this, the first line is too long,
                     // remove the last word
@@ -240,7 +238,6 @@
         } else if (right > 0 && left < 0) {
             if (last === 'left') {
                 for (const item of left_data_v.slice(-2)) {
-                    console.log(item);
                     right_data_v.push(item);
                 }
             }
