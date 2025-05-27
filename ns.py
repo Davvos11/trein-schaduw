@@ -147,4 +147,19 @@ class NS:
 
     def get_stations(self) -> list[tuple[str, str]]:
         response = self._get_json("https://gateway.apiportal.ns.nl/nsapp-stations/v3?includeNonPlannableStations=false")
-        return [(station["id"]["code"], station["names"]["long"]) for station in response["payload"]]
+        stations = [(station["id"]["code"], station["names"]["long"]) for station in response["payload"]]
+
+        stations_grouped = dict()
+        for code, name in stations:
+            group_name = name.split(" ")[0]
+            stations_grouped.setdefault(group_name, []).append((code, name))
+
+        stations_sorted = []
+        for stations_set in stations_grouped.values():
+            sorted_set = sorted(stations_set, key=lambda station: station[1])
+            centraal = next(filter(lambda station: "Centraal" in station[1], stations_set), None)
+            if centraal is not None:
+                sorted_set.remove(centraal)
+                stations_sorted.append(centraal)
+            stations_sorted.extend(sorted_set)
+        return stations_sorted
