@@ -71,6 +71,52 @@
         kop: false,
     })
 
+    function station_label(name) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 52;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.font = '600 28px sans-serif';
+        // Handle station names that are too long for one line
+        // Canvas width was set up so that this matches the point
+        // where the actual NS signs start using two lines :)
+        // NOTE: this code only supports two lines
+        // But this is fine because there is only 7 stations where
+        // this applies, of which only 3 are actual Dutch stations
+        if (ctx.measureText(name).width > canvas.width - 30) {
+            const result = [];
+            const words = name.split(/[ |-]/);
+            let first_line = "";
+            let char_index = 0;
+            for (const [i, word] of words.entries()) {
+                char_index += word.length;
+                const seperator = name[char_index];
+                first_line += word + seperator;
+                console.log(word, seperator, first_line);
+                if (ctx.measureText(first_line).width > canvas.width - 30) {
+                    // If we hit this, the first line is too long,
+                    // remove the last word
+                    char_index -= word.length - 1;
+                    first_line = first_line.slice(0, char_index);
+                    result.push(first_line);
+                    result.push(name.slice(char_index))
+                    break;
+                }
+            }
+            canvas.height += (result.length - 1) * 36
+            ctx.fillStyle = 'white';
+            ctx.font = '600 28px sans-serif';
+            for (const [i, line] of result.entries()) {
+                ctx.fillText(line, 28, 36*(i+1));
+            }
+        } else {
+            ctx.fillText(name, 28, 36);
+        }
+        ctx.fillRect(0, 0, 20, 20);
+        return canvas;
+    }
+
     const annotation_lines = labels.map((label) => {
         return {
             type: 'line',
@@ -89,7 +135,7 @@
             backgroundColor: label.kop ? 'rgba(255,225,220,0.8)' : 'rgba(245,245,245, 0.8)',
             content: [label.name],
             font: {
-                size: 13
+                size: 13,
             },
             rotation: -90,
             position: '40%',
@@ -124,6 +170,7 @@
             ]
         },
         options: {
+            devicePixelRatio: 4,
             stepped: 'middle',
             animation: {
                 duration: 0,
@@ -175,15 +222,25 @@
         item.xValue = 0;
         item.position = {x: 'center', y: 'center'};
         delete item.rotation;
+
+        item.backgroundColor = 'rgb(0,43,186)';
+        item.color = 'white';
+        item.content = station_label(item.content[0]);
+        item.width = item.content.width / 2;
+        item.height = item.content.height / 2;
+        item.padding = 0;
+        item.font.weight = 'bold';
+
         return item;
     });
-    annotation_labels_v[0].position.y = '0%';
-    annotation_labels_v[annotation_labels_v.length - 1].position.y = '100%';
     const annotations_v = Object.assign({}, annotation_lines_v.concat(annotation_labels_v));
+
+    const min = new Date(left_data[0][0].getTime() - 120000);
+    const max = new Date(left_data[left_data.length - 1][0].getTime() + 120000);
 
     const ctx_v = document.getElementById("chart-vertical");
     const duration = Number(document.getElementById("duration").innerText); // (duration in seconds)
-    ctx_v.height = Math.max(460, duration / 30);
+    ctx_v.height = Math.max(300, duration / 30);
     new Chart(ctx_v, {
         type: 'line',
         data: {
@@ -222,6 +279,8 @@
                     ticks: {
                         stepSize: 15,
                     },
+                    min: min,
+                    max: max,
                 },
                 x: {
                     min: -1,
