@@ -7,15 +7,14 @@ from fastapi import FastAPI, Request, Query
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from main import get_result
-from ns import NS
+from cache import NsCached
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-ns = NS()
+ns = NsCached()
 
 
 @app.get("/")
@@ -30,11 +29,11 @@ async def index(request: Request):
 async def result_page(request: Request, trip: int,
                       from_: Optional[str] = Query(None, alias='from'),
                       to: Optional[str] = None):
-    journey, result = get_result(trip, None, from_, to)
+    journey = ns.get_result(trip, None, from_, to)
     return templates.TemplateResponse(
         request=request, name="result.html",
         context={
-            "result": json.dumps([asdict(r) for r in result], default=str),
+            "result": json.dumps([asdict(r) for r in journey.result], default=str),
             "journey": journey,
             "trip": trip,
             "from": from_,

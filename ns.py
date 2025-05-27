@@ -47,11 +47,12 @@ class Journey:
 
 
 @dataclass
-class JourneyShort:
+class JourneyResult:
     name: str
     number: int
     direction: str
     duration: float
+    stops: list[Stop]
 
 
 class NS:
@@ -72,7 +73,7 @@ class NS:
         journey_id = self._get_text(f"https://gateway.apiportal.ns.nl/virtual-train-api/v1/ritnummer/{train_nr}")
         return int(journey_id)
 
-    def get_journey(self, journey_id: int) -> tuple[JourneyShort, list[Stop]]:
+    def get_journey(self, journey_id: int) -> JourneyResult:
         response = self._get_json(
             f"https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/journey?train={journey_id}&omitCrowdForecast=true")
         stops = response["payload"]["stops"]
@@ -95,14 +96,15 @@ class NS:
             stops_result.append(Stop(station_code, name, departure, arrival))
 
         product = stops[0]["departures"][0]["product"]
-        info = JourneyShort(
+        info = JourneyResult(
             f"{product['operatorName']} {product['longCategoryName']}",
             journey_id,
             stops[0]["destination"],
             (stops_result[-1].arrival - stops_result[0].departure).total_seconds(),
+            stops_result
         )
 
-        return info, stops_result
+        return info
 
     def get_route(self, station_codes: list[str]) -> list[Point]:
         station_str = ",".join(station_codes)

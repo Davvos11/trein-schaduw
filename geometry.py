@@ -2,10 +2,10 @@ import math
 from dataclasses import dataclass
 
 
+@dataclass
 class Point:
-    def __init__(self, lat: float, lon: float):
-        self.lat = lat
-        self.lon = lon
+    lat: float
+    lon: float
 
     def __repr__(self):
         return f"({self.lat}, {self.lon})"
