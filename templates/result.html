@@ -58,6 +58,7 @@
     const left_data = flat_data.map((line) => [new Date(line['time']), line['left']]);
     const right_data = flat_data.map((line) => [new Date(line['time']), line['right']]);
     const altitude_data = flat_data.map((line) => [new Date(line['time']), line['altitude']]);
+    const duration = Number(document.getElementById("duration").innerText); // (duration in seconds)
 
     const labels = raw_data.map((segment) => {
         return {
@@ -72,6 +73,96 @@
         name: last_segment['stop2'],
         kop: false,
     })
+
+    const annotation_lines = labels.map((label) => {
+        return {
+            type: 'line',
+            xMin: label.time,
+            xMax: label.time,
+            borderColor: 'grey',
+            borderWidth: 2,
+            borderDash: [5, 15],
+        }
+    });
+    const annotation_labels = labels.map((label) => {
+        return {
+            type: 'label',
+            xValue: label.time,
+            yValue: 0.8,
+            backgroundColor: label.kop ? 'rgba(255,225,220,0.8)' : 'rgba(245,245,245, 0.8)',
+            content: [label.name],
+            font: {
+                size: 13,
+            },
+            rotation: -90,
+            position: '40%',
+        }
+    });
+    annotation_labels[annotation_labels.length - 1].position = '60%';
+    const annotations = Object.assign({}, annotation_lines.concat(annotation_labels));
+
+    function create_chart_horizontal() {
+        const ctx_h = document.getElementById("chart-horizontal");
+        ctx_h.height = 200 * (700 / ctx_h.parentElement.offsetWidth);
+        const width = Math.max(300, duration / 12);
+        if (width > ctx_h.parentElement.offsetWidth) {
+            ctx_h.parentElement.style.width = width + "px";
+        }
+        return new Chart(ctx_h, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Links',
+                        data: left_data,
+                        borderColor: 'red',
+                        pointStyle: false,
+                    },
+                    {
+                        label: 'Rechts',
+                        data: right_data,
+                        borderColor: 'blue',
+                        pointStyle: false,
+                    },
+                    {
+                        label: 'Hoogte',
+                        data: altitude_data,
+                        borderColor: 'green',
+                        pointStyle: false,
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRation: false,
+                stepped: 'middle',
+                animation: {
+                    duration: 0,
+                },
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            // parser: 'HH:mm',
+                            unit: 'minute',
+                            displayFormats: {minute: 'HH:mm'}
+                        }
+                    },
+                    y: {
+                        min: 0,
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    annotation: {
+                        annotations: annotations,
+                    }
+                }
+            },
+        });
+    }
 
     function station_label(name, kop = false) {
         const canvas = document.createElement('canvas');
@@ -91,7 +182,7 @@
             const words = name.split(/[ |-]/);
             let first_line = "";
             let char_index = 0;
-            for (const [i, word] of words.entries()) {
+            for (const word of words) {
                 char_index += word.length;
                 const seperator = name[char_index];
                 first_line += word + seperator;
@@ -130,90 +221,6 @@
         return canvas;
     }
 
-    const annotation_lines = labels.map((label) => {
-        return {
-            type: 'line',
-            xMin: label.time,
-            xMax: label.time,
-            borderColor: 'grey',
-            borderWidth: 2,
-            borderDash: [5, 15],
-        }
-    });
-    const annotation_labels = labels.map((label) => {
-        return {
-            type: 'label',
-            xValue: label.time,
-            yValue: 0.8,
-            backgroundColor: label.kop ? 'rgba(255,225,220,0.8)' : 'rgba(245,245,245, 0.8)',
-            content: [label.name],
-            font: {
-                size: 13,
-            },
-            rotation: -90,
-            position: '40%',
-        }
-    });
-    annotation_labels[annotation_labels.length - 1].position = '60%';
-    const annotations = Object.assign({}, annotation_lines.concat(annotation_labels));
-
-    const ctx_h = document.getElementById("chart-horizontal");
-    new Chart(ctx_h, {
-        type: 'line',
-        data: {
-            datasets: [
-                {
-                    label: 'Links',
-                    data: left_data,
-                    borderColor: 'red',
-                    pointStyle: false,
-                },
-                {
-                    label: 'Rechts',
-                    data: right_data,
-                    borderColor: 'blue',
-                    pointStyle: false,
-                },
-                {
-                    label: 'Hoogte',
-                    data: altitude_data,
-                    borderColor: 'green',
-                    pointStyle: false,
-                }
-            ]
-        },
-        options: {
-            devicePixelRatio: 4,
-            stepped: 'middle',
-            animation: {
-                duration: 0,
-            },
-            responsive: true,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        // parser: 'HH:mm',
-                        unit: 'minute',
-                        displayFormats: {minute: 'HH:mm'}
-                    }
-                },
-                y: {
-                    min: 0,
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                annotation: {
-                    annotations: annotations,
-                }
-            }
-        },
-    });
-
-
     // TODO, niet >=
     const left_data_v = left_data
         .map(([time, value]) => value > 0 ? [-value, time] : [null, time]);
@@ -240,9 +247,9 @@
                 size: 13,
             },
             position: {x: 'center', y: 'center'},
-            width : content.width / 2,
-            height : content.height / 2,
-            padding : 0,
+            width: content.width / 2,
+            height: content.height / 2,
+            padding: 0,
         }
     });
     const annotations_v = Object.assign({}, annotation_lines_v.concat(annotation_labels_v));
@@ -250,68 +257,82 @@
     const min = new Date(left_data[0][0].getTime() - 120000);
     const max = new Date(left_data[left_data.length - 1][0].getTime() + 120000);
 
-    const ctx_v = document.getElementById("chart-vertical");
-    const duration = Number(document.getElementById("duration").innerText); // (duration in seconds)
-    ctx_v.height = Math.max(300, duration / 30);
-    new Chart(ctx_v, {
-        type: 'line',
-        data: {
-            datasets: [
-                {
-                    label: 'Links',
-                    data: left_data_v,
-                    borderColor: 'red',
-                    pointStyle: false,
-                },
-                {
-                    label: 'Rechts',
-                    data: right_data_v,
-                    borderColor: 'blue',
-                    pointStyle: false,
-                },
-            ]
-        },
-        options: {
-            maintainAspectRation: false,
-            stepped: 'middle',
-            animation: {
-                duration: 0,
+    function create_chart_vertical() {
+        const ctx_v = document.getElementById("chart-vertical");
+        const step_size = Math.min(15, Math.round((duration / 800) / 5) * 5);
+        ctx_v.height = Math.max(300, duration / 30) * (770 / ctx_v.parentElement.offsetWidth);
+        return new Chart(ctx_v, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'Links',
+                        data: left_data_v,
+                        borderColor: 'red',
+                        pointStyle: false,
+                    },
+                    {
+                        label: 'Rechts',
+                        data: right_data_v,
+                        borderColor: 'blue',
+                        pointStyle: false,
+                    },
+                ]
             },
-            indexAxis: 'y',
-            responsive: true,
-            scales: {
-                y: {
-                    type: 'time',
-                    time: {
-                        // parser: 'HH:mm',
-                        unit: 'minute',
-                        displayFormats: {minute: 'HH:mm'}
-                    },
-                    reverse: true,
-                    ticks: {
-                        stepSize: 15,
-                    },
-                    min: min,
-                    max: max,
+            options: {
+                // maintainAspectRation: false,
+                stepped: 'middle',
+                animation: {
+                    duration: 0,
                 },
-                x: {
-                    min: -1,
-                    max: 1,
-                    ticks: {
-                        callback: (value) => Math.abs(value),
+                indexAxis: 'y',
+                responsive: true,
+                scales: {
+                    y: {
+                        type: 'time',
+                        time: {
+                            // parser: 'HH:mm',
+                            unit: 'minute',
+                            displayFormats: {minute: 'HH:mm'}
+                        },
+                        reverse: true,
+                        ticks: {
+                            stepSize: step_size,
+                        },
+                        min: min,
+                        max: max,
+                    },
+                    x: {
+                        min: -1,
+                        max: 1,
+                        ticks: {
+                            callback: (value) => Math.abs(value),
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    annotation: {
+                        annotations: annotations_v,
                     }
                 }
             },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                annotation: {
-                    annotations: annotations_v,
-                }
-            }
-        },
-    });
+        });
+    }
+
+    let chart_h = create_chart_horizontal();
+    let chart_v = create_chart_vertical();
+
+    document.getElementById("nav-horizontal").onclick = () => {
+        chart_h.destroy();
+        chart_h = create_chart_horizontal();
+    }
+    document.getElementById("nav-vertical").onclick = () => {
+        chart_v.destroy();
+        chart_v = create_chart_vertical();
+    }
 </script>
 </body>
 </html>

@@ -18,3 +18,11 @@
 .number {
     font-size: 0.85em;
 }
+
+#chart-tabs {
+    overflow-x: scroll;
+}
+
+#tab-horizontal {
+    min-width: 100%;
+}
