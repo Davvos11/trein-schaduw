@@ -84,7 +84,10 @@ class Cache:
             else:
                 return cached
         result = fn(*args, **kwargs)
-        self.set_dataclass(key, result, expiration)
+        if list_type is not None:
+            self.set_dataclass(key, result, expiration)
+        else:
+            self.set(key, result, expiration)
         return result
 
 
