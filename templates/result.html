@@ -221,11 +221,42 @@
         return canvas;
     }
 
-    // TODO, niet >=
-    const left_data_v = left_data
-        .map(([time, value]) => value > 0 ? [-value, time] : [null, time]);
-    const right_data_v = right_data
-        .map(([time, value]) => value > 0 ? [value, time] : [null, time]);
+    const left_data_v = [];
+    const right_data_v = [];
+    let last = null;
+    for (const line of flat_data) {
+        const time = new Date(line['time']);
+        const left = line['left'];
+        const right = line['right'];
+        if (left > 0 && right < 0) {
+            if (last === 'right') {
+                for (const item of right_data_v.slice(-2)) {
+                    left_data_v.push(item);
+                }
+            }
+            left_data_v.push([-left, time]);
+            right_data_v.push([null, time]);
+            last = 'left';
+        } else if (right > 0 && left < 0) {
+            if (last === 'left') {
+                for (const item of left_data_v.slice(-2)) {
+                    console.log(item);
+                    right_data_v.push(item);
+                }
+            }
+            right_data_v.push([right, time]);
+            left_data_v.push([null, time]);
+            last = 'right';
+        } else {
+            right_data_v.push([right, time]);
+            left_data_v.push([left, time]);
+        }
+    }
+    // // TODO, niet >=
+    // const left_data_v = left_data
+    //     .map(([time, value]) => value > 0 ? [-value, time] : [null, time]);
+    // const right_data_v = right_data
+    //     .map(([time, value]) => value > 0 ? [value, time] : [null, time]);
 
     const annotation_lines_v = annotation_lines.map((old_item) => {
         const item = structuredClone(old_item);

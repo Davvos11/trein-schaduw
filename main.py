@@ -91,6 +91,11 @@ def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
             # print("Sun: {bearing_to_compass(sun_position.azimuth)}, train: {bearing_to_compass(train_bearing)},"
             #       " left: {dot_left}, right: {dot_right}")
 
+            if sun_position.altitude < 0.05:
+                multiplier = max(0, sun_position.altitude / 0.05)
+                dot_left *= multiplier
+                dot_right *= multiplier
+
             segment_result.append(SegmentResult(current_time, dot_left, dot_right, sun_position.altitude))
 
             current_time += timedelta(seconds=line.distance / speed)
