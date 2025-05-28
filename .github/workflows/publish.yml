@@ -25,6 +25,7 @@ jobs:
           push: true
           tags: docker.dovatvis.nl/${{ github.event.repository.name }}:latest
       - name: Deploy
-        uses: JamesIves/fetch-api-data-action@v2
+        uses: fjogeleit/http-request-action@v1
         with:
-          endpoint: 'https://pull.dovatvis.nl?service=${{github.event.repository.name}}&path=/home/david/servers&token=${{secrets.PULL_TOKEN}}'
+          url: 'https://pull.dovatvis.nl?service=${{github.event.repository.name}}&path=/home/david/servers&token=${{secrets.PULL_TOKEN}}'
+          method: 'GET'

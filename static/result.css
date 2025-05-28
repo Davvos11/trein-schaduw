@@ -2,10 +2,14 @@
     max-width: 800px;
 }
 
+#results-container {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
 .info {
     display: flex;
     align-items: center;
-    margin-top: 10px;
 }
 
 .info *:first-child {
@@ -18,15 +22,6 @@
 
 .number {
     font-size: 0.85em;
-}
-
-.station-select {
-
-}
-
-.verdict {
-    padding-top: 20px;
-    padding-bottom: 20px;
 }
 
 #chart-tabs {
