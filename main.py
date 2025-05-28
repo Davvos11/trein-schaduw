@@ -8,7 +8,7 @@ from sun_position_calculator import SunPositionCalculator
 
 from geometry import Vec
 from logic import collect_segments, collect_distances, SegmentResult, Result, collect_bearings, filter_stops
-from ns import NS, JourneyResult
+from ns import NS, JourneyResult, Stop
 from plot import Plot
 
 
@@ -25,11 +25,22 @@ def main(journey_id: Optional[int], train_nr: Optional[int],
         plot.add_results(result.result)
         plot.show()
 
+
 @dataclass
 class FinalResult(JourneyResult):
     result: list[Result]
     left: float
     right: float
+
+    @staticmethod
+    def from_journey(
+            journey: JourneyResult, result: list[Result], left: float, right: float,
+    ):
+        return FinalResult(
+            journey.name, journey.number, journey.direction, journey.duration, journey.stops,
+            result, left, right
+        )
+
 
 def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
                from_station: Optional[str] = None, to_station: Optional[str] = None,
@@ -48,7 +59,7 @@ def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
     if show_list:
         for stop in stops:
             print(f"{stop.code}: {stop.name} ({stop.time_string()})")
-        return FinalResult(**asdict(journey), result=[])
+        return FinalResult.from_journey(journey, [], 0, 0)
 
     result = []
     duration_left = 0
@@ -111,7 +122,7 @@ def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
             current_time += timedelta(seconds=duration)
         result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
 
-    return FinalResult(**asdict(journey), result=result, left=duration_left, right=duration_right)
+    return FinalResult.from_journey(journey, result, duration_left, duration_right)
 
 
 if __name__ == '__main__':
