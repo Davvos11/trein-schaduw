@@ -53,6 +53,7 @@ def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
     result = []
     duration_left = 0
     duration_right = 0
+    duration_total = 0
 
     segments = collect_segments(stops)
     previous_bearing = None
@@ -107,10 +108,12 @@ def get_result(ns: NS, journey_id: Optional[int], train_nr: Optional[int],
                 duration_left += duration
             if dot_right > 0:
                 duration_right += duration
+            duration_total += duration
 
             current_time += timedelta(seconds=duration)
         result.append(Result(segment.stop1.name, segment.stop2.name, kop, segment_result))
 
+    journey.duration = duration_total
     return FinalResult(**asdict(journey), result=result, left=duration_left, right=duration_right)
 
 
