@@ -300,7 +300,10 @@
 
     function create_chart_vertical() {
         const ctx_v = document.getElementById("chart-vertical");
-        const step_size = Math.min(15, Math.round((duration / 800) / 5) * 5);
+        let step_size = Math.min(15, Math.round((duration / 800) / 5) * 5);
+        if (step_size === 0) {
+            step_size = 5;
+        }
         ctx_v.height = Math.max(300, duration / 30) * (770 / ctx_v.parentElement.offsetWidth);
         return new Chart(ctx_v, {
             type: 'line',
