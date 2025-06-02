@@ -8,11 +8,15 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from cache import NsCached
+from error import TreinSchaduwError, exception_handler
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# noinspection PyTypeChecker
+app.add_exception_handler(TreinSchaduwError, exception_handler)
 
 ns = NsCached()
 
@@ -30,6 +34,7 @@ async def result_page(request: Request, trip: int,
                       from_: Optional[str] = Query(None, alias='from'),
                       to: Optional[str] = None):
     journey = ns.get_result(trip, None, from_, to)
+    stations = list(filter(lambda s: s.departure is not None or s.arrival is not None, journey.stops))
     return templates.TemplateResponse(
         request=request, name="result.html",
         context={
@@ -42,6 +47,7 @@ async def result_page(request: Request, trip: int,
             "right_time": round(journey.right / 60),
             "left_percentage": round(journey.left / journey.duration * 100),
             "right_percentage": round(journey.right / journey.duration * 100),
+            "stations": stations,
         }
     )
 

@@ -24,7 +24,31 @@
             <span class="number text-secondary">({{ journey.number }})</span></h2>
         <a role="button" href="/" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Terug</a>
     </div>
-    <div id="results-container" class="row gx-5 gy-3">
+    <div class="station-select row">
+        <div class="col-6">
+            <select id="from-select" class="form-select" autocomplete="off" aria-label="Van">
+                {% for stop in stations %}
+                    {% if stop.code == from %}
+                    <option value="{{ stop.code }}" selected>{{ stop.name }}</option>
+                    {% else %}
+                    <option value="{{ stop.code }}">{{ stop.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6">
+            <select id="to-select" class="form-select" autocomplete="off" aria-label="Van">
+                {% for stop in stations %}
+                    {% if stop.code == to %}
+                    <option value="{{ stop.code }}" selected>{{ stop.name }}</option>
+                    {% else %}
+                    <option value="{{ stop.code }}">{{ stop.name }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="verdict row gx-5 gy-3">
         <div class="col-12 col-md-6">
             <div class="card {{ 'text-white bg-primary' if left_time >= right_time else 'text-primary border-primary' }}">
                 <div class="card-body">
@@ -67,6 +91,19 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 <script>
+    document.getElementById("from-select").onchange = (ev) => {
+        const new_from = ev.target.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set("from", new_from);
+        window.location.href = url.href;
+    }
+    document.getElementById("to-select").onchange = (ev) => {
+        const new_to = ev.target.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set("to", new_to);
+        window.location.href = url.href;
+    }
+
     const unit = document.getElementById("data").value;
     /** @type Array<object> */
     const raw_data = JSON.parse(unit);
