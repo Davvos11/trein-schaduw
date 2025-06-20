@@ -65,7 +65,7 @@
         const to_code = document.querySelector(`#stations option[value="${to_name}"]`).dataset.value;
         const time = document.getElementById("time").value;
 
-        let url = `/search/${from_code}/${to_code}`;
+        let url = `/api/search/${from_code}/${to_code}`;
         if (time !== "") {
             url += `?dep_time=${time}`
         }
