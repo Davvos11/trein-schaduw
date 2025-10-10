@@ -58,6 +58,11 @@ header .logo {
     }
 }
 
+.trip-track span {
+    width: 100%;
+    text-align: center;
+}
+
 .trip-type {
     text-align: center;
 }

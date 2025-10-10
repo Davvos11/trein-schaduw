@@ -98,25 +98,41 @@
                 minute: "2-digit"
             })
             const url = `/result?trip=${journey['number']}&from=${from_code}&to=${to_code}`;
-            result_div.innerHTML += `<div><a href="${url}" class="row">
-                <div class="col-2 trip-time">${departure}</div>
-                <div class="col-7">
-                    <div class="row">
-                        <div class="col-12 trip-direction">${journey['direction']}</div>
-                        <div class="col-12 trip-via text-secondary">
-                            ${journey['stops'].length > 0 ? `via ${journey['stops'].join(', ')}` : ''}
+            result_div.innerHTML += `<div><a href="${url}" class="row d-flex align-items-center">
+                <div class="col-9 row">
+                    <div class="col-3 trip-time">${departure}</div>
+                    <div class="col-9">
+                        <div class="row">
+                            <div class="col-12 trip-direction">${journey['direction']}</div>
+                            <div class="col-12 trip-via text-secondary">
+                                ${journey['stops'].length > 0 ? `via ${journey['stops'].join(', ')}` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-1 trip-track d-flex align-items-center">${journey['dep_track']}</div>
-                <div class="col-2 trip-type d-flex align-items-center">${journey['name']}</div>
+                <div class="col-1 trip-track"><span>${journey['dep_track']}</span></div>
+                <div class="col-2 trip-type">${journey['name']}</div>
             </a></div><hr>`;
         }
+
+        // Save search field values
+        inputs.forEach(input => {
+            localStorage.setItem(input.id, input.value);
+        });
     }
 
-    // Already search if there is still values in the search fields (most browsers remember this)
+    // Load search field values from localstorage
+    const form = document.getElementById('search-trips');
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {
+        const saved = localStorage.getItem(input.id);
+        if (saved) input.value = saved;
+    });
+
+
+    // Already search if there is still values in the search fields
     if (document.getElementById("from").value !== "" && document.getElementById("to").value !== "") {
-        document.querySelector("#search-trips input[type=submit]").click();
+        document.querySelector("#search-trips button[type=submit]").click();
     }
 </script>
 </body>
