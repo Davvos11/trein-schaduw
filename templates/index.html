@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col d-flex align-items-center">
             <div>
-                <h1 >Zon in de trein</h1>
+                <h1>Zon in de trein</h1>
                 <h5 class="text-muted">Aan welke kant van de trein zit ik in de zon?</h5>
             </div>
         </div>
@@ -56,6 +56,11 @@
         <button type="submit" class="form-control btn btn-primary"><i class="fa-solid fa-search"></i> Zoeken</button>
     </form>
 
+    <div id="loading" class="d-none justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
     <ul id="trips"></ul>
 </main>
 <script>
@@ -71,8 +76,26 @@
     const auto_complete_from = new Autocomplete(document.getElementById("from"), auto_complete_options);
     const auto_complete_to = new Autocomplete(document.getElementById("to"), auto_complete_options);
 
+    /**
+     * @param {boolean} loading
+     */
+    function set_loading(loading) {
+        const loading_elem = document.getElementById("loading");
+        const result_elem = document.getElementById("trips");
+        if (loading) {
+            loading_elem.classList.add("d-flex");
+            loading_elem.classList.remove("d-none");
+            result_elem.classList.add("d-none");
+        } else {
+            loading_elem.classList.remove("d-flex");
+            loading_elem.classList.add("d-none");
+            result_elem.classList.remove("d-none");
+        }
+    }
+
     document.getElementById("search-trips").onsubmit = async (ev) => {
         ev.preventDefault();
+        set_loading(true);
 
         const from_name = document.getElementById("from").value;
         const to_name = document.getElementById("to").value;
@@ -115,10 +138,19 @@
             </a></div><hr>`;
         }
 
+        // Show spinner when clicking on a link
+        result_div.querySelectorAll("a").forEach((item) => {
+            item.onclick = () => {
+                set_loading(true);
+            };
+        })
+
         // Save search field values
         inputs.forEach(input => {
             localStorage.setItem(input.id, input.value);
         });
+
+        set_loading(false);
     }
 
     // Load search field values from localstorage
