@@ -6,6 +6,18 @@ header .logo {
     width: 100%;
 }
 
+.info-icon {
+    position: absolute;
+    right: 0;
+    top: 1rem;
+    color: var(--bs-secondary-color);
+    cursor: pointer;
+}
+
+.info-icon:hover {
+    color: var(--bs-body-color);
+}
+
 .container {
     max-width: 500px;
 }
