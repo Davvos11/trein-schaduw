@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>{{ trip }}: {{ from }} - {{ to }} - Zon in de trein</title>
+    <link rel="icon" type="image/x-icon" href="/static/icon.png">
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
+    <script src="/static/darkmode.js"></script>
 
     <script src="https://kit.fontawesome.com/bc451147a3.js" crossorigin="anonymous"></script>
 
@@ -69,11 +71,11 @@
     <span id="duration" style="display: none;">{{ journey.duration }}</span>
     <nav class="nav nav-tabs" role="tablist">
         <a class="nav-link active" id="nav-vertical" data-bs-toggle="tab" href="#tab-vertical"
-           role="tab" aria-controls="tab-vertical" aria-selected="false">
+           role="tab" aria-controls="tab-vertical" aria-selected="true">
             Simpel
         </a>
         <a class="nav-link" id="nav-horizontal" data-bs-toggle="tab" href="#tab-horizontal"
-           role="tab" aria-controls="tab-horizontal" aria-selected="true">
+           role="tab" aria-controls="tab-horizontal" aria-selected="false">
             Geavanceerd
         </a>
     </nav>

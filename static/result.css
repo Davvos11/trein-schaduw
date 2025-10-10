@@ -29,8 +29,29 @@
     padding-bottom: 20px;
 }
 
+@media (prefers-color-scheme: dark) {
+    .text-primary {
+        background-color: rgba(var(--bs-primary-rgb),0.1);
+    }
+    .text-danger {
+        background-color: rgba(var(--bs-danger-rgb),0.1);
+    }
+}
+
 #chart-tabs {
     overflow-x: scroll;
+}
+
+@media (prefers-color-scheme: dark) {
+    #chart-tabs {
+        background-color: white;
+    }
+
+    .nav-link.active {
+        background-color: white !important;
+        color: var(--bs-body-bg) !important;
+        border-bottom: none;
+    }
 }
 
 #tab-horizontal {

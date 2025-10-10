@@ -45,9 +45,17 @@ header .logo {
     background-image: url("/static/spoor.svg");
     background-size: contain;
     background-repeat: no-repeat;
+    background-position: center;
     text-align: center;
     font-size: 1.2em;
     line-height: 2.6em;
+    padding-top: .5em;
+}
+
+@media (prefers-color-scheme: dark) {
+    .trip-track {
+        background-image: url("/static/spoor-dark.svg");
+    }
 }
 
 .trip-type {
