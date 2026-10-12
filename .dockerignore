@@ -1,2 +1,9 @@
 .github/
 Dockerfile
+.env
+.venv/
+__pycache__/
+.idea/
+.stfolder/
+k8s/
+*.xcf

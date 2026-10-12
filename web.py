@@ -26,6 +26,11 @@ app.add_exception_handler(TreinSchaduwError, exception_handler)
 
 ns = NsCached()
 
+
+@app.get("/healthz", include_in_schema=False)
+async def healthz():
+    return "ok"
+
 web_router = APIRouter(tags=["website"])
 api_router = APIRouter(prefix="/api", tags=["api"])
 
