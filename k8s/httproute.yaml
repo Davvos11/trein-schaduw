@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: trein-schaduw
+spec:
+  parentRefs:
+    - name: public
+      namespace: gateway
+  hostnames:
+    - trein.dovatvis.nl
+    - zonindetrein.nl
+    - www.zonindetrein.nl
+  rules:
+    - backendRefs:
+        - name: trein-schaduw
+          port: 80
