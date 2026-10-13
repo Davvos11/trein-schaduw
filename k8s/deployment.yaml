@@ -21,9 +21,9 @@ spec:
       containers:
         - name: app
           image: app # replaced by kustomize
-          # Behind Traefik (host network: connects from the cni0 gateway 10.42.0.1): trust its
-          # X-Forwarded-Proto/-For, so the app sees https and Traefik's view of the client.
-          args: ["--host", "0.0.0.0", "--proxy-headers", "--forwarded-allow-ips", "10.42.0.1"]
+          # Only Traefik reaches this pod, and it replaces X-Forwarded-* from untrusted sources (it trusts
+          # Cloudflare's edge): trust the headers and take the leftmost X-Forwarded-For entry as client.
+          args: ["--host", "0.0.0.0", "--proxy-headers", "--forwarded-allow-ips", "*"]
           ports:
             - name: http
               containerPort: 8000
