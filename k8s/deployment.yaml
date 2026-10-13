@@ -21,7 +21,9 @@ spec:
       containers:
         - name: app
           image: app # replaced by kustomize
-          args: ["--host", "0.0.0.0"]
+          # Only Traefik reaches this pod, and it replaces X-Forwarded-* from untrusted sources (it trusts
+          # Cloudflare's edge): trust the headers and take the leftmost X-Forwarded-For entry as client.
+          args: ["--host", "0.0.0.0", "--proxy-headers", "--forwarded-allow-ips", "*"]
           ports:
             - name: http
               containerPort: 8000
