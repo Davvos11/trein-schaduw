@@ -1,13 +1,27 @@
-FROM python:3.13-slim@sha256:09a17cad02668ae61ece136b4fd36ac3849e14f670ebedb637ea3e15580525bc
+FROM python:3.13-slim@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90 AS build
 
-RUN pip install poetry>=2.0.1
+RUN pip install --no-cache-dir "poetry>=2.0.1"
 
 WORKDIR /code
-COPY pyproject.toml .
-COPY poetry.lock .
+COPY pyproject.toml poetry.lock ./
 
-RUN poetry config virtualenvs.create false \
-    && poetry update --no-interaction --no-ansi
+# Install the locked dependencies into /code/.venv, without pip in that venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_VIRTUALENVS_OPTIONS_NO_PIP=true
+RUN poetry install --only main --no-root --no-interaction --no-ansi
+
+FROM python:3.13-slim@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90
+
+# Debian fixes not yet in the base image (zlib1g). The app doesn't use pip at runtime,
+# and scanners flag the packages pip vendors.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* \
+    && python -m pip uninstall -y pip
+
+WORKDIR /code
+COPY --from=build /code/.venv /code/.venv
+ENV PATH="/code/.venv/bin:$PATH"
 
 COPY . .
 
